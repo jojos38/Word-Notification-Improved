@@ -15,11 +15,11 @@
 module.exports = (_ => {
 	const config = {
 		"info": {
-			"name": "Word Notification Improved",
-			"id": "WordNotificationImproved",
-			"author": "jojos38",
-			"version": "0.0.1",
-			"description": "Notifiy the user when a specific word is said in a server"
+			name: "Word Notification Improved",
+			id: "WordNotificationImproved",
+			author: "jojos38",
+			version: "0.0.1",
+			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
 
@@ -60,6 +60,8 @@ module.exports = (_ => {
 		// ======================================================= =============== ======================================================= //
 		// ------------------------------------------------------- CODE START HERE ------------------------------------------------------- //
 		// ======================================================= =============== ======================================================= //
+		var settings;
+		const electron = require('electron');	
 		const defaultSettings = {
 			"white-list-words": [],
 			"bdfdb-notification": true,
@@ -78,17 +80,17 @@ module.exports = (_ => {
 			"windows-notification": false,
 			"windows-notification-focus": true
 		}
-		const electron = require('electron');
-		var settings;
-		const defaultTimeout = 5.0;
+
 		function parseList(list) {
 			var words = list.split(',,').map(e => e.trim());
 			return words;
 		}
+
 		function saveSetting(key, value) {
 			settings[key] = typeof value == "string" ? parseList(value) : value;
 			BdApi.saveData(config.info.id, "settings", settings);
 		}
+
 		function getSetting(key) {
 			return BdApi.loadData(config.info.id, key);
 		}
@@ -96,6 +98,8 @@ module.exports = (_ => {
 		return class WordNotificationImproved extends Plugin {
 			// Required function. Called when the plugin is activated (including after reloads)
 			start() {
+				if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${config.info.name} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
+				ZLibrary.PluginUpdater.checkForUpdate(config.info.id, config.info.version, "LINK_TO_RAW_CODE");
 				this.getChannelById = BdApi.findModuleByProps('getChannel').getChannel;
 				this.getServerById = BdApi.findModuleByProps('getGuild').getGuild;
 				this.isBlocked = BdApi.findModuleByProps('isBlocked').isBlocked;
@@ -103,14 +107,12 @@ module.exports = (_ => {
 				this.cancelPatch = BdApi.monkeyPatch(BdApi.findModuleByProps("dispatch"), 'dispatch', { after: this.messageReceived.bind(this) });
 				this.selfID = BdApi.findModuleByProps('getId').getId();
 				this.currentChannel = BdApi.findModuleByProps("getChannelId").getChannelId;
-				if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${config.info.name} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
-				ZLibrary.PluginUpdater.checkForUpdate(config.info.id, config.info.version, "LINK_TO_RAW_CODE");
-				settings = getSetting("settings") || {};
 				this.checkSettings();
 				this.checkChangelog();
 			}
 			
 			checkSettings() {
+				settings = getSetting("settings") || {};
 				for (const [name, value] of Object.entries(defaultSettings)) {
 					if (settings[name] == null) settings[name] = value;
 				}
@@ -205,12 +207,12 @@ module.exports = (_ => {
 				}
 				
 				if (settings["bdapi-notification"]) {
-					const timeout = settings["bdapi-display-time"] || defaultTimeout;
+					const timeout = settings["bdapi-display-time"];
 					BdApi.showToast(toastString, { timeout: timeout*1000, type: "info" });
 				}
 				
 				if (settings["bdfdb-notification"]) {
-					const timeout = settings["bdfdb-display-time"] || defaultTimeout;
+					const timeout = settings["bdfdb-display-time"];
 					BDFDB.NotificationUtils.toast(toastString, {type: "info", timeout: timeout*1000});
 				}
 			}
@@ -251,11 +253,9 @@ module.exports = (_ => {
 			}
 
 			getSettingsPanel () {
-				const list = [];
-				
+				const list = [];		
 				const mainSettings = new ZeresPluginLibrary.Settings.SettingGroup("Main settings");
 				const notificationSettings = new ZeresPluginLibrary.Settings.SettingGroup("Notifications settings");
-				
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
@@ -354,7 +354,6 @@ module.exports = (_ => {
 						}
 					)
 				];
-				
 				mainSettings.append(...mainSettingsMenu);
 				notificationSettings.append(...notificationSettingsMenu);
 				list.push(mainSettings);
