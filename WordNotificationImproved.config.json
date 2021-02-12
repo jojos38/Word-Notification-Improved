@@ -1,0 +1,27 @@
+{
+    "version": "0.0.1",
+    "settings": {
+        "white-list-words": [
+            "jojos38",
+            "jojo38",
+            "jojos",
+            "turbopatate",
+            "turbo patate"
+        ],
+        "bdfdb-notification": true,
+        "bdapi-notification": false,
+        "ignore-private-messages": false,
+        "ignore-muted-channels": false,
+        "ignore-blocked-users": true,
+        "ignore-if-focused": true,
+        "case-sensitive": false,
+        "ignore-muted-servers": false,
+        "private-messages-only": false,
+        "black-listed-servers": [],
+        "black-listed-users": [],
+        "bdapi-display-time": 1,
+        "bdfdb-display-time": 1,
+        "windows-notification": false,
+        "windows-notification-focus": true
+    }
+}
