@@ -2,14 +2,15 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.1
+ * @version 0.0.2
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
  * @donate DM me on Discord for Paypal link
  * @patreon https://www.patreon.com/jojos38/creators
  * @website https://github.com/jojos38
- * @source https://github.com/jojos38/Word-Notification-Improved
+ * @source https://raw.githubusercontent.com/jojos38/Word-Notification-Improved/master/WordNotificationImproved.plugin.js
+ * @updateUrl https://raw.githubusercontent.com/jojos38/Word-Notification-Improved/master/WordNotificationImproved.plugin.js
 **/
 
 module.exports = (_ => {
