@@ -14,5 +14,5 @@
     "bdapi-display-time": 5.0,
     "bdfdb-display-time": 5.0,
     "windows-notification": false,
-    "windows-notification-focus": true
+    "windows-notification-focused": true
 }
