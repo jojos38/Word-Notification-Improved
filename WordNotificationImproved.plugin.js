@@ -171,7 +171,7 @@ module.exports = (_ => {
 
 				var notifWord = "";
 				var shouldNotify = false;
-				const content = settings["case-sensitive"] ? ? message.content : message.content.toLowerCase();
+				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
 				if (!content) return;
 				for (let word of words) { // For each word
 					// Check if it's a Regex
