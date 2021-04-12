@@ -190,20 +190,40 @@ module.exports = (_ => {
 
 				if (!shouldNotify) return;
 				
-				const channelName = channel ? (channel.name == "" ? "conversation" : "#" + channel.name) : "private messages";
-				const guildName = guild ? guild.name : "private messages";
-				const toastString = author.username + " just said \"" + notifWord + "\" in channel " + (channelName || "private messages") + " of " + guildName;
+				var toastString = "";
+				//If it's a message in a guild
+				if (message.guild_id)
+				{
+				toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name;
 				
-				if (settings["windows-notification"]) {
-					var skip = false;
-					if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
-					if (!skip) {
-						const notification = new Notification(
-							"The word " + notifWord + " was said",
-							{ body: "In channel " + channelName + " of " + guildName + "\n" + author.username + ": " + content });
-						notification.addEventListener('click', _ => {
-							this.goToMessage(guild.id, channel.id, message.id);
-						});
+					if (settings["windows-notification"]) {
+						var skip = false;
+						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
+						if (!skip) {
+							const notification = new Notification(
+								"Word Notification Improved",
+								{ body: "The word \"" + notifWord + "\" was said in channel #" + channel.name + " of " + guild.name + "\n" + author.username + ": " + content });
+							notification.addEventListener('click', _ => {
+								this.goToMessage(guild.id, channel.id, message.id);
+							});
+						}
+					}
+				}
+				else
+				{
+				toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
+				
+					if (settings["windows-notification"]) {
+						var skip = false;
+						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
+						if (!skip) {
+							const notification = new Notification(
+								"Word Notification Improved",
+								{ body: "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + content });
+							notification.addEventListener('click', _ => {
+								this.goToMessage(guild.id, channel.id, message.id);
+							});
+						}
 					}
 				}
 				
