@@ -16,7 +16,7 @@
 module.exports = (_ => {
 	const config = {
 		"info": {
-			name: "Word Notification Improved",
+			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
 			version: "0.0.3",
@@ -62,7 +62,6 @@ module.exports = (_ => {
 		// ------------------------------------------------------- CODE START HERE ------------------------------------------------------- //
 		// ======================================================= =============== ======================================================= //
 		var settings;
-		const electron = require('electron');	
 		const defaultSettings = {
 			"white-list-words": [],
 			"bdfdb-notification": true,
@@ -104,6 +103,7 @@ module.exports = (_ => {
 				this.getChannelById = BdApi.findModuleByProps('getChannel').getChannel;
 				this.getServerById = BdApi.findModuleByProps('getGuild').getGuild;
 				this.isBlocked = BdApi.findModuleByProps('isBlocked').isBlocked;
+				this.transitionTo = BdApi.findModuleByProps('transitionTo').transitionTo;
 				this.isMuted = BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted').isGuildOrCategoryOrChannelMuted.bind(BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted'));
 				this.cancelPatch = BdApi.monkeyPatch(BdApi.findModuleByProps("dispatch"), 'dispatch', { after: this.messageReceived.bind(this) });
 				this.selfID = BdApi.findModuleByProps('getId').getId();
@@ -123,24 +123,25 @@ module.exports = (_ => {
 			stop() { this.cancelPatch(); }
 			
 			goToMessage(server, channel, message) {
-				require('electron').remote.getCurrentWindow().focus();
 				this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`);
 				requestAnimationFrame(() => this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`));
 			}
 			
-			messageReceived(data) {
+			async messageReceived(data) {
 				const words = settings["white-list-words"]; // Get the words
 				if (!words) return;
 				if (!words.length) return;
 				if (data.methodArguments[0].type != 'MESSAGE_CREATE' && data.methodArguments[0].type != 'MESSAGE_UPDATE') return;
 				if (data.methodArguments[0].optimistic) return;
 
+				const focused = document.hasFocus();
 				const blacklistedUsers = settings["black-listed-users"];
 				const blacklistedServers = settings["black-listed-servers"];
 				const message = data.methodArguments[0].message;
 				const author = message.author || {};
 				const channel = this.getChannelById(message.channel_id);
 				const guild = this.getServerById(message.guild_id);
+				const guildID = guild ? guild.id : null;
 
 				// Ignore muted guilds?
 				if (settings["ignore-muted-servers"]) if (this.isMuted(message.guild_id)) return;
@@ -161,21 +162,24 @@ module.exports = (_ => {
 				if (settings["ignore-private-messages"]) if (!message.guild_id) return;
 
 				// Ignore if the channel is focused
-				if (settings["ignore-if-focused"]) if (this.currentChannel() == message.channel_id && electron.remote.getCurrentWindow().isFocused()) return;
+				if (settings["ignore-if-focused"]) if (this.currentChannel() == message.channel_id && focused) return;
 
 				// Check blacklisted users
 				if (blacklistedUsers.includes(author.id)) return;
 				
 				// Check blacklisted servers
 				if (blacklistedServers.includes(message.guild_id)) return;
-
-				var notifWord = "";
-				var shouldNotify = false;
-				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
-				if (!content) return;
+				
+				// Check if message has something in it
+				if (!message.content) return;
+				
+				// Check if any word from the list matches
+				let notifWord = "";
+				let shouldNotify = false;
+				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();			
 				for (let word of words) { // For each word
 					// Check if it's a Regex
-					var match = word.match(new RegExp('^/(.*?)/([gimy]*)$'));
+					const match = word.match(new RegExp('^/(.*?)/([gimy]*)$'));
 					try { if (match) word = new RegExp(match[1], match[2]); } catch(error) {}
 					
 					// Check if the message contains the word or the regex
@@ -183,56 +187,45 @@ module.exports = (_ => {
 						if (settings["case-sensitive"]) word = word.toLowerCase();
 						if (content.includes(word)) { notifWord = word; shouldNotify = true; }
 					} else {
-						var wordMatch = content.match(word);
+						const wordMatch = content.match(word);
 						if (wordMatch) { notifWord = wordMatch; shouldNotify = true; }
 					}
 				}
-
 				if (!shouldNotify) return;
 				
-				var toastString = "";
 				//If it's a message in a guild
-				if (message.guild_id)
-				{
-				toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name + ".";
-					if (settings["windows-notification"]) {
-						var skip = false;
-						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
-						if (!skip) {
-							const notification = new Notification(
-								"Word Notification Improved",
-								{ body: "The word \"" + notifWord + "\" was said in channel #" + channel.name + " of " + guild.name + ".\n" + author.username + ": " + content });
-							notification.addEventListener('click', _ => {
-								this.goToMessage(guild.id, channel.id, message.id);
-							});
-						}
-					}
+				if (message.guild_id) {
+					var toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name + ".";
+					var windowsString = "The word \"" + notifWord + "\" was said in channel #" + channel.name + " of " + guild.name + ".\n" + author.username + ": " + message.content;
 				}
-				else
-				{
-				toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
-					if (settings["windows-notification"]) {
-						var skip = false;
-						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
-						if (!skip) {
-							const notification = new Notification(
-								"Word Notification Improved",
-								{ body: "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + content });
-							notification.addEventListener('click', _ => {
-								this.goToMessage(guild.id, channel.id, message.id);
-							});
-						}
+				else {
+					var toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
+					var windowsString = "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + message.content;
+				}
+				
+				// Should we send a Windows notification?
+				if (settings["windows-notification"]) {
+					// Send a notification only if not focused?
+					let onlyNotFocused = settings["windows-notification-focused"];
+					if ((!focused && onlyNotFocused) || !onlyNotFocused) {
+						const notification = new Notification("Word Notification Improved", { body: windowsString });
+						notification.addEventListener('click', _ => {
+							this.goToMessage(guildID, channel.id, message.id);
+						});
 					}
 				}
 				
+				// Should we send a bdapi notification?
 				if (settings["bdapi-notification"]) {
 					const timeout = settings["bdapi-display-time"];
 					BdApi.showToast(toastString, { timeout: timeout*1000, type: "info" });
 				}
 				
+				// Should we send a bdfdb notification?
 				if (settings["bdfdb-notification"]) {
 					const timeout = settings["bdfdb-display-time"];
-					BDFDB.NotificationUtils.toast(toastString, {type: "info", timeout: timeout*1000});
+					const toast = BDFDB.NotificationUtils.toast(toastString, {type: "info", timeout: timeout*1000});
+					toast.addEventListener("click", _ => { this.goToMessage(guildID, channel.id, message.id); });
 				}
 			}
 			
@@ -338,8 +331,8 @@ module.exports = (_ => {
 					),
 					this.newSwitch(
 						"Windows notification only when not focused", // Title
-						"Shows a Windows notification ONLY when Discord's window is not focused", // Desc
-						"windows-notification-focus" // Identifier
+						"Shows a Windows notification only when Discord's window is not focused", // Desc
+						"windows-notification-focused" // Identifier
 					),
 					this.newSwitch(
 						"Send BdApi Discord notification",
