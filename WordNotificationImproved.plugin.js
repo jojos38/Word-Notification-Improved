@@ -190,9 +190,9 @@ module.exports = (_ => {
 
 				if (!shouldNotify) return;
 				
-				const channelName = channel ? (channel.name == "" ? "conversation" : channel.name) : "private messages";
+				const channelName = channel ? (channel.name == "" ? "conversation" : "#" + channel.name) : "private messages";
 				const guildName = guild ? guild.name : "private messages";
-				const toastString = author.username + " just said " + notifWord + " in channel " + (channelName || "private messages") + " of " + guildName;
+				const toastString = author.username + " just said \"" + notifWord + "\" in channel " + (channelName || "private messages") + " of " + guildName;
 				
 				if (settings["windows-notification"]) {
 					var skip = false;
@@ -260,13 +260,13 @@ module.exports = (_ => {
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
-						"The list of words that should notify you. Regex is WORKING (example: Hello,,/myregex/g,,Bye)", // Desc
+						"The list of words that should notify you. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
 						"white-list-words", // Identifier
 						{ placeholder: "Your words here separated by TWO comma" }
 					),
 					this.newSwitch(
 						"Case sensitive",
-						"Should the list Words To Check be case sensitive or not (does not affect Regex)",
+						"Should the list of words to check be case sensitive or not (does not affect Regex)",
 						"case-sensitive"
 					),
 					this.newSwitch(
@@ -325,7 +325,7 @@ module.exports = (_ => {
 					),
 					this.newSwitch(
 						"Send BdApi Discord notification",
-						"Shows a BdApi notification (at the middle bottom Discord's window)",
+						"Shows a BdApi notification (at the bottom middle of Discord's window)",
 						"bdapi-notification",
 						true
 					),
@@ -341,7 +341,7 @@ module.exports = (_ => {
 					),
 					this.newSwitch(
 						"Send BDFDB notification",
-						"Shows a BDFDB notification (at the top right Discord's window)",
+						"Shows a BDFDB notification (at the top right of Discord's window)",
 						"bdfdb-notification"
 					),
 					this.newSlider(
