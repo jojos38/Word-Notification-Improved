@@ -190,20 +190,38 @@ module.exports = (_ => {
 
 				if (!shouldNotify) return;
 				
-				const channelName = channel ? (channel.name == "" ? "conversation" : channel.name) : "private messages";
-				const guildName = guild ? guild.name : "private messages";
-				const toastString = author.username + " just said " + notifWord + " in channel " + (channelName || "private messages") + " of " + guildName;
-				
-				if (settings["windows-notification"]) {
-					var skip = false;
-					if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
-					if (!skip) {
-						const notification = new Notification(
-							"The word " + notifWord + " was said",
-							{ body: "In channel " + channelName + " of " + guildName + "\n" + author.username + ": " + content });
-						notification.addEventListener('click', _ => {
-							this.goToMessage(guild.id, channel.id, message.id);
-						});
+				var toastString = "";
+				//If it's a message in a guild
+				if (message.guild_id)
+				{
+				toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name + ".";
+					if (settings["windows-notification"]) {
+						var skip = false;
+						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
+						if (!skip) {
+							const notification = new Notification(
+								"Word Notification Improved",
+								{ body: "The word \"" + notifWord + "\" was said in channel #" + channel.name + " of " + guild.name + ".\n" + author.username + ": " + content });
+							notification.addEventListener('click', _ => {
+								this.goToMessage(guild.id, channel.id, message.id);
+							});
+						}
+					}
+				}
+				else
+				{
+				toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
+					if (settings["windows-notification"]) {
+						var skip = false;
+						if (settings["windows-notification-focused"] && electron.remote.getCurrentWindow().isFocused()) skip = true;
+						if (!skip) {
+							const notification = new Notification(
+								"Word Notification Improved",
+								{ body: "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + content });
+							notification.addEventListener('click', _ => {
+								this.goToMessage(guild.id, channel.id, message.id);
+							});
+						}
 					}
 				}
 				
@@ -260,13 +278,13 @@ module.exports = (_ => {
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
-						"The list of words that should notify you. Regex is WORKING (example: Hello,,/myregex/g,,Bye)", // Desc
+						"The list of words that should notify you. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
 						"white-list-words", // Identifier
 						{ placeholder: "Your words here separated by TWO comma" }
 					),
 					this.newSwitch(
 						"Case sensitive",
-						"Should the list Words To Check be case sensitive or not (does not affect Regex)",
+						"Should the list of words to check be case sensitive or not (does not affect Regex)",
 						"case-sensitive"
 					),
 					this.newSwitch(
@@ -325,7 +343,7 @@ module.exports = (_ => {
 					),
 					this.newSwitch(
 						"Send BdApi Discord notification",
-						"Shows a BdApi notification (at the middle bottom Discord's window)",
+						"Shows a BdApi notification (at the bottom middle of Discord's window)",
 						"bdapi-notification",
 						true
 					),
@@ -341,7 +359,7 @@ module.exports = (_ => {
 					),
 					this.newSwitch(
 						"Send BDFDB notification",
-						"Shows a BDFDB notification (at the top right Discord's window)",
+						"Shows a BDFDB notification (at the top right of Discord's window)",
 						"bdfdb-notification"
 					),
 					this.newSlider(
