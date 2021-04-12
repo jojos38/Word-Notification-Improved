@@ -56,8 +56,8 @@ module.exports = (_ => {
 			return template.content.firstElementChild;
 		}
 	} : (([Plugin, BDFDB]) => {
-		
-		
+
+
 		// ======================================================= =============== ======================================================= //
 		// ------------------------------------------------------- CODE START HERE ------------------------------------------------------- //
 		// ======================================================= =============== ======================================================= //
@@ -111,7 +111,7 @@ module.exports = (_ => {
 				this.checkSettings();
 				this.checkChangelog();
 			}
-			
+
 			checkSettings() {
 				settings = getSetting("settings") || {};
 				for (const [name, value] of Object.entries(defaultSettings)) {
@@ -121,12 +121,12 @@ module.exports = (_ => {
 
 			// Required function. Called when the plugin is deactivated
 			stop() { this.cancelPatch(); }
-			
+
 			goToMessage(server, channel, message) {
 				this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`);
 				requestAnimationFrame(() => this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`));
 			}
-			
+
 			async messageReceived(data) {
 				const words = settings["white-list-words"]; // Get the words
 				if (!words) return;
@@ -166,22 +166,22 @@ module.exports = (_ => {
 
 				// Check blacklisted users
 				if (blacklistedUsers.includes(author.id)) return;
-				
+
 				// Check blacklisted servers
 				if (blacklistedServers.includes(message.guild_id)) return;
-				
+
 				// Check if message has something in it
 				if (!message.content) return;
-				
+
 				// Check if any word from the list matches
 				let notifWord = "";
 				let shouldNotify = false;
-				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();			
+				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
 				for (let word of words) { // For each word
 					// Check if it's a Regex
 					const match = word.match(new RegExp('^/(.*?)/([gimy]*)$'));
 					try { if (match) word = new RegExp(match[1], match[2]); } catch(error) {}
-					
+
 					// Check if the message contains the word or the regex
 					if (typeof word === "string") {
 						if (settings["case-sensitive"]) word = word.toLowerCase();
@@ -192,7 +192,7 @@ module.exports = (_ => {
 					}
 				}
 				if (!shouldNotify) return;
-				
+
 				//If it's a message in a guild
 				if (message.guild_id) {
 					var toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name + ".";
@@ -202,7 +202,7 @@ module.exports = (_ => {
 					var toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
 					var windowsString = "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + message.content;
 				}
-				
+
 				// Should we send a Windows notification?
 				if (settings["windows-notification"]) {
 					// Send a notification only if not focused?
@@ -214,13 +214,13 @@ module.exports = (_ => {
 						});
 					}
 				}
-				
+
 				// Should we send a bdapi notification?
 				if (settings["bdapi-notification"]) {
 					const timeout = settings["bdapi-display-time"];
 					BdApi.showToast(toastString, { timeout: timeout*1000, type: "info" });
 				}
-				
+
 				// Should we send a bdfdb notification?
 				if (settings["bdfdb-notification"]) {
 					const timeout = settings["bdfdb-display-time"];
@@ -228,13 +228,13 @@ module.exports = (_ => {
 					toast.addEventListener("click", _ => { this.goToMessage(guildID, channel.id, message.id); });
 				}
 			}
-			
+
 			// This function is used to check if a new update was out and show the changelog of it
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
 					window.BdApi.alert(config.info.name + " changelog", "First release!\n Be sure to check the settings (Discord's settings,-> plugins -> " + config.info.name + ")");
-					BdApi.saveData(config.info.id, "version", config.info.version);	
+					BdApi.saveData(config.info.id, "version", config.info.version);
 				}
 			}
 
@@ -242,13 +242,13 @@ module.exports = (_ => {
 			settingChanged(p1, id, value) {
 				saveSetting(id, value);
 			}
-			
+
 			newSwitch(name, desc, id) {
 				const tmpSwitch = new ZeresPluginLibrary.Settings.Switch(name, desc, settings[id]);
 				tmpSwitch.id = id;
 				return tmpSwitch;
 			}
-			
+
 			newSlider(name, desc, min, max, id, options) {
 				const tmpSlider = new ZeresPluginLibrary.Settings.Slider(name, desc, min, max, settings[id],  null, options);
 				tmpSlider.id = id;
@@ -265,7 +265,7 @@ module.exports = (_ => {
 			}
 
 			getSettingsPanel () {
-				const list = [];		
+				const list = [];
 				const mainSettings = new ZeresPluginLibrary.Settings.SettingGroup("Main settings");
 				const notificationSettings = new ZeresPluginLibrary.Settings.SettingGroup("Notifications settings");
 				const mainSettingsMenu = [
