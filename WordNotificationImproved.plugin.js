@@ -97,6 +97,9 @@ module.exports = (_ => {
 
 		return class WordNotificationImproved extends Plugin {
 			// Required function. Called when the plugin is activated (including after reloads)
+
+			useWhitelist;
+
 			start() {
 				if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${config.info.name} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
 				ZLibrary.PluginUpdater.checkForUpdate(config.info.id, config.info.version, "LINK_TO_RAW_CODE");
@@ -137,6 +140,7 @@ module.exports = (_ => {
 				const focused = document.hasFocus();
 				const blacklistedUsers = settings["black-listed-users"];
 				const blacklistedServers = settings["black-listed-servers"];
+				const whitelistedServers = settings["white-listed-servers"];
 				const message = data.methodArguments[0].message;
 				const author = message.author || {};
 				const channel = this.getChannelById(message.channel_id);
@@ -168,7 +172,10 @@ module.exports = (_ => {
 				if (blacklistedUsers.includes(author.id)) return;
 
 				// Check blacklisted servers
-				if (blacklistedServers.includes(message.guild_id)) return;
+				if (!settings['use-white-list'] && blacklistedServers.includes(message.guild_id)) return;
+
+				// Check whitelisted servers
+				else if (settings['use-white-list'] && !whitelistedServers.includes(message.guild_id)) return;
 
 				// Check if message has something in it
 				if (!message.content) return;
@@ -257,17 +264,18 @@ module.exports = (_ => {
 
 			newTextBox(name, desc, id, options) {
 				var content = "";
-				for (let word of settings[id]) content += ",," + word;
+				if (settings[id]) for (let word of settings[id]) content += ",," + word;
 				content = content.slice(2);
 				const tmpTextbox = new ZeresPluginLibrary.Settings.Textbox(name, desc, content, null, options);
 				tmpTextbox.id = id;
 				return tmpTextbox;
 			}
 
-			getSettingsPanel () {
+			getSettingsPanel() {
 				const list = [];
 				const mainSettings = new ZeresPluginLibrary.Settings.SettingGroup("Main settings");
 				const notificationSettings = new ZeresPluginLibrary.Settings.SettingGroup("Notifications settings");
+				const advancedSettings = new ZeresPluginLibrary.Settings.SettingGroup("Advanced settings");
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
@@ -366,10 +374,26 @@ module.exports = (_ => {
 						}
 					)
 				];
+				const advancedSettingsMenu = [
+					this.newSwitch(
+						"Use a whitelist instead of a blacklist",
+						"This will disallow every servers but the ones whitelisted (Black-list won't have any effect if you enable this!)",
+						"use-white-list"
+					),
+					this.newTextBox(
+						"Whitelisted servers",
+						"Only those servers will trigger the notifications (put in IDs)",
+						"white-listed-servers",
+						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" }
+					)
+				];
+
 				mainSettings.append(...mainSettingsMenu);
 				notificationSettings.append(...notificationSettingsMenu);
+				advancedSettings.append(...advancedSettingsMenu);
 				list.push(mainSettings);
 				list.push(notificationSettings);
+				list.push(advancedSettings);
 				return ZeresPluginLibrary.Settings.SettingPanel.build(this.settingChanged, ...list);
 			}
 		}
