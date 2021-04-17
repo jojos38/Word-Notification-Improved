@@ -184,7 +184,7 @@ module.exports = (_ => {
 
 					// Check if the message contains the word or the regex
 					if (typeof word === "string") {
-						if (settings["case-sensitive"]) word = word.toLowerCase();
+						if (!settings["case-sensitive"]) word = word.toLowerCase();
 						if (content.includes(word)) { notifWord = word; shouldNotify = true; }
 					} else {
 						const wordMatch = content.match(word);
