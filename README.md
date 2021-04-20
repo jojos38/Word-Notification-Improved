@@ -6,6 +6,7 @@ This plugin is fully configurable.
 You can use Regex as word match, you can have different types of notifications, from Windows notification to in-Discord notification.
 
 List of options:
+- Customizable messages
 - Case sensitive -> Should word matching be case sensitive (does not affect Regex)
 - Ignore muted servers
 - Ignore muted channels
@@ -14,6 +15,7 @@ List of options:
 - Ignore if window is focused and on the channel
 - Private message only -> Will only notify words from private messages and ignore all servers
 - Ability to blacklist servers and users
+- Ability to use a whitelist instead of a blacklist
 
 List of notification options:
 - Send Windows notification -> A normal Windows notification
