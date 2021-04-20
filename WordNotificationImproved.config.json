@@ -1,20 +1,34 @@
 {
-    "white-list-words": [],
-    "bdfdb-notification": true,
-    "bdapi-notification": false,
-    "ignore-private-messages": false,
-    "ignore-muted-channels": false,
-    "ignore-blocked-users": true,
-    "ignore-if-focused": true,
-    "case-sensitive": false,
-    "ignore-muted-servers": false,
-    "private-messages-only": false,
-	"white-listed-servers": [],
-    "black-listed-servers": [],
-    "black-listed-users": [],
-	"use-white-list": false,
-    "bdapi-display-time": 5.0,
-    "bdfdb-display-time": 5.0,
-    "windows-notification": false,
-    "windows-notification-focused": true
+    "settings": {
+        "white-list-words": [],
+        "bdfdb-notification": true,
+        "bdapi-notification": false,
+        "ignore-private-messages": false,
+        "ignore-muted-channels": false,
+        "ignore-blocked-users": true,
+        "ignore-if-focused": true,
+        "case-sensitive": false,
+        "ignore-muted-servers": false,
+        "private-messages-only": false,
+        "white-listed-servers": [],
+        "black-listed-servers": [],
+        "black-listed-users": [],
+        "use-white-list": false,
+        "bdapi-display-time": 5,
+        "bdfdb-display-time": 5,
+        "windows-notification": false,
+        "windows-notification-focused": true,
+        "dm-toast": [
+            "{{username}} just said \"{{trigger-word}}\" in a private message"
+        ],
+        "guild-toast": [
+            "{{username}} just said \"{{trigger-word}}\" in channel #{{channel}} of {{guild}}"
+        ],
+        "dm-windows": [
+            "The word \"{{trigger-word}}\" was said in a private message.\\n{{username}}: {{message}}"
+        ],
+        "guild-windows": [
+            "The word \"{{trigger-word}}\" was said in channel #{{channel}} of {{guild}}\\n{{username}}: {{message}}"
+        ]
+    }
 }

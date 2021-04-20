@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.3
+ * @version 0.0.4
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.3",
+			version: "0.0.4",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -73,12 +73,18 @@ module.exports = (_ => {
 			"case-sensitive": false,
 			"ignore-muted-servers": false,
 			"private-messages-only": false,
+			"white-listed-servers": [],
 			"black-listed-servers": [],
 			"black-listed-users": [],
+			"use-white-list": false,
 			"bdapi-display-time": 5.0,
 			"bdfdb-display-time": 5.0,
 			"windows-notification": false,
-			"windows-notification-focus": true
+			"windows-notification-focused": true,
+			"dm-toast": ["{{username}} just said \"{{trigger-word}}\" in a private message"],
+			"guild-toast": ["{{username}} just said \"{{trigger-word}}\" in channel #{{channel}} of {{guild}}"],
+			"dm-windows": ["The word \"{{trigger-word}}\" was said in a private message.\\n{{username}}: {{message}}"],
+			"guild-windows": ["The word \"{{trigger-word}}\" was said in channel #{{channel}} of {{guild}}\\n{{username}}: {{message}}"]
 		}
 
 		function parseList(list) {
@@ -128,6 +134,17 @@ module.exports = (_ => {
 			goToMessage(server, channel, message) {
 				this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`);
 				requestAnimationFrame(() => this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`));
+			}
+
+			replaceVariables(string, guild, channel, author, message, notifWord) {
+				if (!string) return "Please check Advanced Settings for Word Notification Improved"
+							   string = string.replace(/\\n/g,       		"\n");
+				if (guild)     string = string.replace(/{{guild}}/g,        guild);
+				if (author)    string = string.replace(/{{username}}/g,  	author);
+				if (channel)   string = string.replace(/{{channel}}/g, 	    channel);
+				if (message)   string = string.replace(/{{message}}/g,      message);
+				if (notifWord) string = string.replace(/{{trigger-word}}/g, notifWord);
+				return string;
 			}
 
 			async messageReceived(data) {
@@ -202,12 +219,11 @@ module.exports = (_ => {
 
 				//If it's a message in a guild
 				if (message.guild_id) {
-					var toastString = author.username + " just said \"" + notifWord + "\" in channel #" + channel.name + " of " + guild.name + ".";
-					var windowsString = "The word \"" + notifWord + "\" was said in channel #" + channel.name + " of " + guild.name + ".\n" + author.username + ": " + message.content;
-				}
-				else {
-					var toastString = author.username + " just said \"" + notifWord + "\" in a private message.";
-					var windowsString = "The word \"" + notifWord + "\" was said in a private message.\n" + author.username + ": " + message.content;
+					var toastString = this.replaceVariables(settings["guild-toast"][0], guild.name, channel.name, author.username, message.content, notifWord);
+					var windowsString = this.replaceVariables(settings["guild-windows"][0], guild.name, channel.name, author.username, message.content, notifWord);
+				} else {
+					var toastString = this.replaceVariables(settings["dm-toast"][0], null, null, author.username, message.content, notifWord);
+					var windowsString = this.replaceVariables(settings["dm-windows"][0], null, null, author.username, message.content, notifWord);
 				}
 
 				// Should we send a Windows notification?
@@ -231,7 +247,11 @@ module.exports = (_ => {
 				// Should we send a bdfdb notification?
 				if (settings["bdfdb-notification"]) {
 					const timeout = settings["bdfdb-display-time"];
-					const toast = BDFDB.NotificationUtils.toast(toastString, {type: "info", timeout: timeout*1000});
+					const toast = BDFDB.NotificationUtils.toast(toastString, {
+						timeout: timeout*1000,
+						barColor: BDFDB.UserUtils.getStatusColor("online", true),
+						avatar: BDFDB.UserUtils.getAvatar(author.id)
+					});
 					toast.addEventListener("click", _ => { this.goToMessage(guildID, channel.id, message.id); });
 				}
 			}
@@ -240,7 +260,7 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "First release!\n Be sure to check the settings (Discord's settings,-> plugins -> " + config.info.name + ")");
+					window.BdApi.alert(config.info.name + " changelog", "You can now change the notification message!\n Be sure to check the settings (Discord's settings -> plugins -> " + config.info.name + ")");
 					BdApi.saveData(config.info.id, "version", config.info.version);
 				}
 			}
@@ -262,10 +282,16 @@ module.exports = (_ => {
 				return tmpSlider;
 			}
 
-			newTextBox(name, desc, id, options) {
+			newTextBox(name, desc, id, options, type) {
 				var content = "";
-				if (settings[id]) for (let word of settings[id]) content += ",," + word;
-				content = content.slice(2);
+
+				if (type == "list") {
+					if (settings[id]) for (let word of settings[id]) content += ",," + word;
+					content = content.slice(2);
+				} else if (type == "message") {
+					content = settings[id] || "";
+				}
+
 				const tmpTextbox = new ZeresPluginLibrary.Settings.Textbox(name, desc, content, null, options);
 				tmpTextbox.id = id;
 				return tmpTextbox;
@@ -281,7 +307,8 @@ module.exports = (_ => {
 						"Words to check", // Title
 						"The list of words that should notify you. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
 						"white-list-words", // Identifier
-						{ placeholder: "Your words here separated by TWO comma" }
+						{ placeholder: "Your words here separated by TWO comma" },
+						"list"
 					),
 					this.newSwitch(
 						"Case sensitive",
@@ -322,13 +349,15 @@ module.exports = (_ => {
 						"Blacklisted servers", // Title
 						"Those servers will be ignored (put in IDs)", // Desc
 						"black-listed-servers", // Identifier
-						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" }
+						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" },
+						"list"
 					),
 					this.newTextBox(
 						"Blacklisted users", // Title
 						"Those users will be ignored (put in IDs)", // Desc
 						"black-listed-users", // Identifier
-						{ placeholder: "Your users ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" }
+						{ placeholder: "Your users ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" },
+						"list"
 					)
 				];
 				const notificationSettingsMenu = [
@@ -384,7 +413,36 @@ module.exports = (_ => {
 						"Whitelisted servers",
 						"Only those servers will trigger the notifications (put in IDs)",
 						"white-listed-servers",
-						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" }
+						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" },
+						"list"
+					),
+					this.newTextBox(
+						"Customize the BdApi and BDFDB notification for DMs",
+						"Variables: {{username}} {{message}} {{trigger-word}} \\n (line break)",
+						"dm-toast",
+						{},
+						"message"
+					),
+					this.newTextBox(
+						"Customize the BdApi and BDFDB notification for servers",
+						"Variables: {{guild}} {{channel}} {{username}} {{message}} {{trigger-word}} \\n (line break)",
+						"guild-toast",
+						{},
+						"message"
+					),
+					this.newTextBox(
+						"Customize the Windows notification for DMs",
+						"Variables: {{guild}} {{username}} {{channel}} {{message}} {{trigger-word}}, \\n (line break)",
+						"dm-windows",
+						{},
+						"message"
+					),
+					this.newTextBox(
+						"Customize the Windows for servers",
+						"Variables: {{username}} {{message}} {{trigger-word}} \\n (line break)",
+						"guild-windows",
+						{},
+						"message"
 					)
 				];
 
