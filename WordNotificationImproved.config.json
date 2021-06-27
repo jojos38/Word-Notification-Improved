@@ -4,7 +4,7 @@
         "bdfdb-notification": true,
         "bdapi-notification": false,
         "ignore-private-messages": false,
-		"ignore-emotes": false,
+	"ignore-emotes": false,
         "ignore-muted-channels": false,
         "ignore-blocked-users": true,
         "ignore-if-focused": true,
