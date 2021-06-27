@@ -67,6 +67,7 @@ module.exports = (_ => {
 			"bdfdb-notification": true,
 			"bdapi-notification": false,
 			"ignore-private-messages": false,
+			"ignore-emotes": false,
 			"ignore-muted-channels": false,
 			"ignore-blocked-users": true,
 			"ignore-if-focused": true,
@@ -197,10 +198,15 @@ module.exports = (_ => {
 				// Check if message has something in it
 				if (!message.content) return;
 
+				// Get message content and check for case sensitivity
+				let content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
+
+				// If ignore emotes
+				if (settings["ignore-emotes"]) content = content.replace(/<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]{18}>/g, "");
+
 				// Check if any word from the list matches
 				let notifWord = "";
 				let shouldNotify = false;
-				const content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
 				for (let word of words) { // For each word
 					// Check if it's a Regex
 					const match = word.match(new RegExp('^/(.*?)/([gimy]*)$'));
@@ -305,7 +311,7 @@ module.exports = (_ => {
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
-						"The list of words that should notify you. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
+						"The list of words that should notify you, seperated by TWO commas. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
 						"white-list-words", // Identifier
 						{ placeholder: "Your words here separated by TWO comma" },
 						"list"
@@ -329,6 +335,11 @@ module.exports = (_ => {
 						"Ignore private messages",
 						null,
 						"ignore-private-messages"
+					),
+					this.newSwitch(
+						"Ignore emotes",
+						null,
+						"ignore-emotes"
 					),
 					this.newSwitch(
 						"Ignore blocked users",
@@ -406,7 +417,7 @@ module.exports = (_ => {
 				const advancedSettingsMenu = [
 					this.newSwitch(
 						"Use a whitelist instead of a blacklist",
-						"This will disallow every servers but the ones whitelisted (Black-list won't have any effect if you enable this!)",
+						"This will disallow every server but the ones whitelisted (Blacklist won't have any effect if you enable this!)",
 						"use-white-list"
 					),
 					this.newTextBox(
@@ -432,7 +443,7 @@ module.exports = (_ => {
 					),
 					this.newTextBox(
 						"Customize the Windows notification for DMs",
-						"Variables: {{guild}} {{username}} {{channel}} {{message}} {{trigger-word}}, \\n (line break)",
+						"Variables: {{guild}} {{username}} {{channel}} {{message}} {{trigger-word}} \\n (line break)",
 						"dm-windows",
 						{},
 						"message"
