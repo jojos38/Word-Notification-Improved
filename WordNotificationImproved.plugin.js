@@ -2,11 +2,11 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.4
+ * @version 0.0.5
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
- * @donate DM me on Discord for Paypal link
+ * @donate https://paypal.me/wanzera
  * @patreon https://www.patreon.com/jojos38/creators
  * @website https://github.com/jojos38
  * @source https://raw.githubusercontent.com/jojos38/Word-Notification-Improved/master/WordNotificationImproved.plugin.js
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.4",
+			version: "0.0.5",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -266,7 +266,7 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "You can now change the notification message!\n Be sure to check the settings (Discord's settings -> plugins -> " + config.info.name + ")");
+					window.BdApi.alert(config.info.name + " changelog", "You can now ignore emotes!\n Be sure to check the settings (Discord's settings -> plugins -> " + config.info.name + ")");
 					BdApi.saveData(config.info.id, "version", config.info.version);
 				}
 			}
