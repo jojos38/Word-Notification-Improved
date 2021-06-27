@@ -198,12 +198,15 @@ module.exports = (_ => {
 				// Check if message has something in it
 				if (!message.content) return;
 
+				// Get message content and check for case sensitivity
+				let content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
+
+				// If ignore emotes
+				if (settings["ignore-emotes"]) content = content.replace(/<a{0,1}:[a-zA-Z0-9_.]{2,32}:[0-9]{18}>/g, "");
+
 				// Check if any word from the list matches
 				let notifWord = "";
 				let shouldNotify = false;
-				var content = settings["case-sensitive"] ? message.content : message.content.toLowerCase();
-				//Copy the content to this new const
-				const originalcontent = content;
 				for (let word of words) { // For each word
 					// Check if it's a Regex
 					const match = word.match(new RegExp('^/(.*?)/([gimy]*)$'));
@@ -212,13 +215,6 @@ module.exports = (_ => {
 					// Check if the message contains the word or the regex
 					if (typeof word === "string") {
 						if (!settings["case-sensitive"]) word = word.toLowerCase();
-						//If it's being used in an emote
-						if (settings["ignore-emotes"])
-						{
-							var EmoteRegex = new RegExp(":.*" + word + ".*:", "g");
-							//Remove the emote from the content so it doesn't get flagged in the next part
-							content = content.replace(EmoteRegex, "");
-						}
 						if (content.includes(word)) { notifWord = word; shouldNotify = true; }
 					} else {
 						const wordMatch = content.match(word);
@@ -226,9 +222,6 @@ module.exports = (_ => {
 					}
 				}
 				if (!shouldNotify) return;
-				
-				//Restore the original content
-				content = originalcontent
 
 				//If it's a message in a guild
 				if (message.guild_id) {
@@ -318,7 +311,7 @@ module.exports = (_ => {
 				const mainSettingsMenu = [
 					this.newTextBox(
 						"Words to check", // Title
-						"The list of words that should notify you, seperated by two commas. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
+						"The list of words that should notify you, seperated by TWO commas. Supports Regex (example: Hello,,/myregex/g,,Bye)", // Desc
 						"white-list-words", // Identifier
 						{ placeholder: "Your words here separated by TWO comma" },
 						"list"
@@ -450,7 +443,7 @@ module.exports = (_ => {
 					),
 					this.newTextBox(
 						"Customize the Windows notification for DMs",
-						"Variables: {{guild}} {{username}} {{channel}} {{message}} {{trigger-word}}, \\n (line break)",
+						"Variables: {{guild}} {{username}} {{channel}} {{message}} {{trigger-word}} \\n (line break)",
 						"dm-windows",
 						{},
 						"message"
