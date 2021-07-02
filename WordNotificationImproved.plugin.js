@@ -6,7 +6,7 @@
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
- * @donate https://paypal.me/wanzera
+ * @donate https://www.paypal.com/biz/fund?id=AR747SNG2H2XW
  * @patreon https://www.patreon.com/jojos38/creators
  * @website https://github.com/jojos38
  * @source https://raw.githubusercontent.com/jojos38/Word-Notification-Improved/master/WordNotificationImproved.plugin.js
