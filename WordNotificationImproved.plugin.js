@@ -449,7 +449,7 @@ module.exports = (_ => {
 						"message"
 					),
 					this.newTextBox(
-						"Customize the Windows for servers",
+						"Customize the Windows notification for servers",
 						"Variables: {{username}} {{message}} {{trigger-word}} \\n (line break)",
 						"guild-windows",
 						{},
