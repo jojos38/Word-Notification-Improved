@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.5
+ * @version 0.0.6
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.5",
+			version: "0.0.6",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -108,16 +108,21 @@ module.exports = (_ => {
 			useWhitelist;
 
 			start() {
+				const that = this;
+				this.messageReceivedOrUpdated = function(data) { that.messageReceived(data); };
+				
 				if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${config.info.name} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
 				ZLibrary.PluginUpdater.checkForUpdate(config.info.id, config.info.version, "LINK_TO_RAW_CODE");
-				this.getChannelById = BdApi.findModuleByProps('getChannel').getChannel;
-				this.getServerById = BdApi.findModuleByProps('getGuild').getGuild;
-				this.isBlocked = BdApi.findModuleByProps('isBlocked').isBlocked;
-				this.transitionTo = BdApi.findModuleByProps('transitionTo').transitionTo;
-				this.isMuted = BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted').isGuildOrCategoryOrChannelMuted.bind(BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted'));
-				this.cancelPatch = BdApi.monkeyPatch(BdApi.findModuleByProps("dispatch"), 'dispatch', { after: this.messageReceived.bind(this) });
-				this.selfID = BdApi.findModuleByProps('getId').getId();
-				this.currentChannel = BdApi.findModuleByProps("getChannelId").getChannelId;
+				this.getChannelById = BdApi.findModuleByProps("getChannel", "hasChannel").getChannel;
+				this.getServerById = BdApi.findModuleByProps("getGuild").getGuild;
+				this.isBlocked = BdApi.findModuleByProps("isBlocked").isBlocked;
+				this.transitionTo = BdApi.findModuleByProps("transitionTo").transitionTo;
+				this.isMuted = BdApi.findModuleByProps("isGuildOrCategoryOrChannelMuted").isGuildOrCategoryOrChannelMuted.bind(BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted'));
+				// Subscribe events
+				BdApi.findModuleByProps("dirtyDispatch").subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated );
+				BdApi.findModuleByProps("dirtyDispatch").subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated );
+				this.selfID = BdApi.findModuleByProps("getId").getId();
+				this.currentChannel = BdApi.findModuleByProps("getVoiceChannelId").getChannelId;
 				this.checkSettings();
 				this.checkChangelog();
 			}
@@ -130,7 +135,10 @@ module.exports = (_ => {
 			}
 
 			// Required function. Called when the plugin is deactivated
-			stop() { this.cancelPatch(); }
+			stop() {
+				BdApi.findModuleByProps("dirtyDispatch").unsubscribe("MESSAGE_CREATE", this.messageReceivedOrUpdated);
+				BdApi.findModuleByProps("dirtyDispatch").unsubscribe("MESSAGE_UPDATE", this.messageReceivedOrUpdated);
+			}
 
 			goToMessage(server, channel, message) {
 				this.transitionTo(`/channels/${server ? server : '@me'}/${channel}/${message}`);
@@ -151,15 +159,13 @@ module.exports = (_ => {
 			async messageReceived(data) {
 				const words = settings["white-list-words"]; // Get the words
 				if (!words) return;
-				if (!words.length) return;
-				if (data.methodArguments[0].type != 'MESSAGE_CREATE' && data.methodArguments[0].type != 'MESSAGE_UPDATE') return;
-				if (data.methodArguments[0].optimistic) return;
+				if (data.optimistic) return;
 
 				const focused = document.hasFocus();
 				const blacklistedUsers = settings["black-listed-users"];
 				const blacklistedServers = settings["black-listed-servers"];
 				const whitelistedServers = settings["white-listed-servers"];
-				const message = data.methodArguments[0].message;
+				const message = data.message;
 				const author = message.author || {};
 				const channel = this.getChannelById(message.channel_id);
 				const guild = this.getServerById(message.guild_id);
@@ -449,7 +455,7 @@ module.exports = (_ => {
 						"message"
 					),
 					this.newTextBox(
-						"Customize the Windows notification for servers",
+						"Customize the Windows for servers",
 						"Variables: {{username}} {{message}} {{trigger-word}} \\n (line break)",
 						"guild-windows",
 						{},
