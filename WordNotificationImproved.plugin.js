@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.6
+ * @version 0.0.7
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -77,6 +77,7 @@ module.exports = (_ => {
 			"white-listed-servers": [],
 			"black-listed-servers": [],
 			"black-listed-users": [],
+			"black-listed-channels": [],
 			"use-white-list": false,
 			"bdapi-display-time": 5.0,
 			"bdfdb-display-time": 5.0,
@@ -163,6 +164,7 @@ module.exports = (_ => {
 
 				const focused = document.hasFocus();
 				const blacklistedUsers = settings["black-listed-users"];
+				const blacklistedChannels = settings["black-listed-channels"];
 				const blacklistedServers = settings["black-listed-servers"];
 				const whitelistedServers = settings["white-listed-servers"];
 				const message = data.message;
@@ -194,6 +196,9 @@ module.exports = (_ => {
 
 				// Check blacklisted users
 				if (blacklistedUsers.includes(author.id)) return;
+				
+				// Check blacklisted channels
+				if (blacklistedChannels.includes(message.channel_id)) return;
 
 				// Check blacklisted servers
 				if (!settings['use-white-list'] && blacklistedServers.includes(message.guild_id)) return;
@@ -364,16 +369,23 @@ module.exports = (_ => {
 					),
 					this.newTextBox(
 						"Blacklisted servers", // Title
-						"Those servers will be ignored (put in IDs)", // Desc
+						"These servers will be ignored (put in IDs)", // Desc
 						"black-listed-servers", // Identifier
-						{ placeholder: "Your servers ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" },
+						{ placeholder: "The server IDs separated by TWO commas (example: 501558901657305098,,201458801257605791)" },
 						"list"
 					),
 					this.newTextBox(
 						"Blacklisted users", // Title
-						"Those users will be ignored (put in IDs)", // Desc
+						"These users will be ignored (put in IDs)", // Desc
 						"black-listed-users", // Identifier
-						{ placeholder: "Your users ID here separated by TWO comma (example: 501558901657305098,,201458801257605791)" },
+						{ placeholder: "The user IDs separated by TWO commas (example: 501558901657305098,,201458801257605791)" },
+						"list"
+					),
+					this.newTextBox(
+						"Blacklisted channels", // Title
+						"These channels will be ignored (put in IDs)", // Desc
+						"black-listed-channels", // Identifier
+						{ placeholder: "The channel IDs separated by TWO commas (example: 501558901657305098,,201458801257605791)" },
 						"list"
 					)
 				];

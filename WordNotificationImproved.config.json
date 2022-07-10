@@ -14,6 +14,7 @@
         "white-listed-servers": [],
         "black-listed-servers": [],
         "black-listed-users": [],
+        "black-listed-channels": [],
         "use-white-list": false,
         "bdapi-display-time": 5,
         "bdfdb-display-time": 5,
