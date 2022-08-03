@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.7
+ * @version 0.0.8
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.7",
+			version: "0.0.8",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -120,8 +120,8 @@ module.exports = (_ => {
 				this.transitionTo = BdApi.findModuleByProps("transitionTo").transitionTo;
 				this.isMuted = BdApi.findModuleByProps("isGuildOrCategoryOrChannelMuted").isGuildOrCategoryOrChannelMuted.bind(BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted'));
 				// Subscribe events
-				BdApi.findModuleByProps("dirtyDispatch").subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated );
-				BdApi.findModuleByProps("dirtyDispatch").subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated );
+				BdApi.findModuleByProps("dispatch", "subscribe").subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated );
+				BdApi.findModuleByProps("dispatch", "subscribe").subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated );
 				this.selfID = BdApi.findModuleByProps("getId").getId();
 				this.currentChannel = BdApi.findModuleByProps("getVoiceChannelId").getChannelId;
 				this.checkSettings();
@@ -137,8 +137,8 @@ module.exports = (_ => {
 
 			// Required function. Called when the plugin is deactivated
 			stop() {
-				BdApi.findModuleByProps("dirtyDispatch").unsubscribe("MESSAGE_CREATE", this.messageReceivedOrUpdated);
-				BdApi.findModuleByProps("dirtyDispatch").unsubscribe("MESSAGE_UPDATE", this.messageReceivedOrUpdated);
+				BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_CREATE", this.messageReceivedOrUpdated);
+				BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_UPDATE", this.messageReceivedOrUpdated);
 			}
 
 			goToMessage(server, channel, message) {
