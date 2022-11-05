@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.8
+ * @version 0.0.9
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.8",
+			version: "0.0.9",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -100,30 +100,27 @@ module.exports = (_ => {
 		}
 
 		function getSetting(key) {
-			return BdApi.loadData(config.info.id, key);
+			return BdApi.Data.load(config.info.id, key);
 		}
 
 		return class WordNotificationImproved extends Plugin {
 			// Required function. Called when the plugin is activated (including after reloads)
 
-			useWhitelist;
-
-			start() {
+			start() {				
 				const that = this;
 				this.messageReceivedOrUpdated = function(data) { that.messageReceived(data); };
 				
 				if (!global.ZeresPluginLibrary) return window.BdApi.alert("Library Missing",`The library plugin needed for ${config.info.name} is missing.<br /><br /> <a href="https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js" target="_blank">Click here to download the library!</a>`);
 				ZLibrary.PluginUpdater.checkForUpdate(config.info.id, config.info.version, "LINK_TO_RAW_CODE");
-				this.getChannelById = BdApi.findModuleByProps("getChannel", "hasChannel").getChannel;
-				this.getServerById = BdApi.findModuleByProps("getGuild").getGuild;
-				this.isBlocked = BdApi.findModuleByProps("isBlocked").isBlocked;
-				this.transitionTo = BdApi.findModuleByProps("transitionTo").transitionTo;
-				this.isMuted = BdApi.findModuleByProps("isGuildOrCategoryOrChannelMuted").isGuildOrCategoryOrChannelMuted.bind(BdApi.findModuleByProps('isGuildOrCategoryOrChannelMuted'));
-				// Subscribe events
-				BdApi.findModuleByProps("dispatch", "subscribe").subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated );
-				BdApi.findModuleByProps("dispatch", "subscribe").subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated );
-				this.selfID = BdApi.findModuleByProps("getId").getId();
-				this.currentChannel = BdApi.findModuleByProps("getVoiceChannelId").getChannelId;
+				this.getChannelById = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getChannel")).getChannel; // BdApi.findModuleByProps("getChannel", "hasChannel").getChannel;
+				this.getServerById = ZeresPluginLibrary.DiscordModules.GuildStore.getGuild; // BdApi.findModuleByProps("getGuild").getGuild;
+				this.isBlocked = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isBlocked")).isBlocked; // BdApi.findModuleByProps("isBlocked").isBlocked;
+				this.transitionTo = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("transitionTo")); // BdApi.findModuleByProps("transitionTo").transitionTo;
+				this.isMuted = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isGuildOrCategoryOrChannelMuted")).isMuted;
+				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated);
+				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated);
+				this.selfID = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getUser")).getCurrentUser().id;
+				this.currentChannel = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getVoiceChannelId")).getChannelId;
 				this.checkSettings();
 				this.checkChangelog();
 			}
@@ -234,7 +231,7 @@ module.exports = (_ => {
 				}
 				if (!shouldNotify) return;
 
-				//If it's a message in a guild
+				// If it's a message in a guild
 				if (message.guild_id) {
 					var toastString = this.replaceVariables(settings["guild-toast"][0], guild.name, channel.name, author.username, message.content, notifWord);
 					var windowsString = this.replaceVariables(settings["guild-windows"][0], guild.name, channel.name, author.username, message.content, notifWord);
@@ -277,8 +274,8 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "You can now ignore emotes!\n Be sure to check the settings (Discord's settings -> plugins -> " + config.info.name + ")");
-					BdApi.saveData(config.info.id, "version", config.info.version);
+					window.BdApi.alert(config.info.name + " changelog", "Fixed for the new BetterDiscord update and fixed typo");
+					BdApi.Data.save(config.info.id, "version", config.info.version);
 				}
 			}
 
@@ -467,7 +464,7 @@ module.exports = (_ => {
 						"message"
 					),
 					this.newTextBox(
-						"Customize the Windows for servers",
+						"Customize the Windows notification for servers",
 						"Variables: {{username}} {{message}} {{trigger-word}} \\n (line break)",
 						"guild-windows",
 						{},
