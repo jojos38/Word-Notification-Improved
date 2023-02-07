@@ -1,4 +1,4 @@
-# Word-Notification-Improved
+# Better Discord Word-Notification-Improved
 ### A remake of the Word Notification plugin by Qwerasd, it notifies you when certain words are said
 
 
