@@ -115,7 +115,7 @@ module.exports = (_ => {
 				this.getChannelById = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getChannel")).getChannel; // BdApi.findModuleByProps("getChannel", "hasChannel").getChannel;
 				this.getServerById = ZeresPluginLibrary.DiscordModules.GuildStore.getGuild; // BdApi.findModuleByProps("getGuild").getGuild;
 				this.isBlocked = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isBlocked")).isBlocked; // BdApi.findModuleByProps("isBlocked").isBlocked;
-				this.transitionTo = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("transitionTo")); // BdApi.findModuleByProps("transitionTo").transitionTo;
+				this.transitionTo = BdApi.Webpack.getModule((m) => typeof m === "function" && String(m).includes(`"transitionTo - Transitioning to "`), { searchExports: true });
 				this.isMuted = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isGuildOrCategoryOrChannelMuted")).isMuted;
 				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated);
 				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated);
