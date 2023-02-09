@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.0.9
+ * @version 0.1.0
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.0.9",
+			version: "0.1.0",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -274,7 +274,7 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "Fixed for the new BetterDiscord update and fixed typo");
+					window.BdApi.alert(config.info.name + " changelog", "Clicking on a notification now opens Discord to the channel");
 					BdApi.Data.save(config.info.id, "version", config.info.version);
 				}
 			}
