@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.1.0",
+			version: "0.1.1",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
