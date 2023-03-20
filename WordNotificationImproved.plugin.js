@@ -283,7 +283,7 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "Clicking on a notification now opens Discord to the channel");
+					window.BdApi.alert(config.info.name + " changelog", "Fix for latest Better Discord version");
 					BdApi.Data.save(config.info.id, "version", config.info.version);
 				}
 			}
