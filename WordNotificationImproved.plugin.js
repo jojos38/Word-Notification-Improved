@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.1.0
+ * @version 0.1.1
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.1.0",
+			version: "0.1.1",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -117,8 +117,17 @@ module.exports = (_ => {
 				this.isBlocked = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isBlocked")).isBlocked; // BdApi.findModuleByProps("isBlocked").isBlocked;
 				this.transitionTo = BdApi.Webpack.getModule((m) => typeof m === "function" && String(m).includes(`"transitionTo - Transitioning to "`), { searchExports: true });
 				this.isMuted = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isGuildOrCategoryOrChannelMuted")).isMuted;
-				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_CREATE", that.messageReceivedOrUpdated);
-				BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch")).subscribe("MESSAGE_UPDATE", that.messageReceivedOrUpdated);
+				const Dispatch = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch", "subscribe"));
+				BdApi.Patcher.before("WordNotificationImproved", Dispatch, "dispatch", (_, args, original) => {
+					const dispatch = args[0];
+					if (!dispatch) return;
+					if (dispatch.type === "MESSAGE_CREATE") {
+						return that.messageReceivedOrUpdated(dispatch);
+					}
+					if (dispatch.type === "MESSAGE_UPDATE") {
+						return that.messageReceivedOrUpdated(dispatch);
+					}
+				});
 				this.selfID = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getUser")).getCurrentUser().id;
 				this.currentChannel = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getVoiceChannelId")).getChannelId;
 				this.checkSettings();
