@@ -2,8 +2,9 @@
 ### A remake of the Word Notification plugin by Qwerasd, it notifies you when certain words are said
 
 
-This plugin is fully configurable.
-You can use Regex as word match, you can have different types of notifications, from Windows notification to in-Discord notification.
+This plugin is fully configurable.\
+You can use Regex as word match, you can have different types of notifications, from Windows notification to in-Discord notification.\
+Special thanks to [Aida Enna](https://github.com/Aida-Enna) for fixing several bugs and adding some features
 
 List of options:
 - Customizable messages
