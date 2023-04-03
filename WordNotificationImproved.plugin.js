@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.1.1
+ * @version 0.1.2
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.1.1",
+			version: "0.1.2",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -118,7 +118,7 @@ module.exports = (_ => {
 				this.transitionTo = BdApi.Webpack.getModule((m) => typeof m === "function" && String(m).includes(`"transitionTo - Transitioning to "`), { searchExports: true });
 				this.isMuted = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("isGuildOrCategoryOrChannelMuted")).isMuted;
 				const Dispatch = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("dispatch", "subscribe"));
-				BdApi.Patcher.before("WordNotificationImproved", Dispatch, "dispatch", (_, args, original) => {
+				this.unpatch = BdApi.Patcher.before("WordNotificationImproved", Dispatch, "dispatch", (_, args, original) => {
 					const dispatch = args[0];
 					if (!dispatch) return;
 					if (dispatch.type === "MESSAGE_CREATE") {
@@ -143,8 +143,9 @@ module.exports = (_ => {
 
 			// Required function. Called when the plugin is deactivated
 			stop() {
-				BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_CREATE", this.messageReceivedOrUpdated);
-				BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_UPDATE", this.messageReceivedOrUpdated);
+				// BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_CREATE", this.messageReceivedOrUpdated);
+				// BdApi.findModuleByProps("dispatch", "subscribe").unsubscribe("MESSAGE_UPDATE", this.messageReceivedOrUpdated);
+				this.unpatch();
 			}
 
 			goToMessage(server, channel, message) {
@@ -283,7 +284,7 @@ module.exports = (_ => {
 			checkChangelog() {
 				const version = BdApi.loadData(config.info.id, "version");
 				if (version != config.info.version) {
-					window.BdApi.alert(config.info.name + " changelog", "Fix for latest Better Discord version");
+					window.BdApi.alert(config.info.name + " changelog", "Fix the unpatch function that wasn't being called");
 					BdApi.Data.save(config.info.id, "version", config.info.version);
 				}
 			}
