@@ -3,7 +3,7 @@
 ### Special thanks to [Aida Enna](https://github.com/Aida-Enna) for fixing bugs, adding some features and pretty much keeping the plugin alive
 
 This plugin is fully configurable.\
-You can use Regex as word match, you can have different types of notifications, from Windows notification to in-Discord notification.\
+You can use Regex as word match, you can have different types of notifications, from Windows notification to in-Discord notification.
 
 List of options:
 - Customizable messages
