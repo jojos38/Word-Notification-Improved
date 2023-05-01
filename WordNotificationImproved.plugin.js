@@ -2,7 +2,7 @@
  * @name WordNotificationImproved
  * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
  * @description Notifiy the user when a specific word is said in a server
- * @version 0.1.2
+ * @version 0.1.3
  * @invite DXpb9DN
  * @authorId 137239068567142400
  * @authorLink https://steamcommunity.com/id/jojos38
@@ -19,7 +19,7 @@ module.exports = (_ => {
 			name: "WordNotificationImproved",
 			id: "WordNotificationImproved",
 			author: "jojos38",
-			version: "0.1.2",
+			version: "0.1.3",
 			description: "Notifiy the user when a specific word is said in a server"
 		}
 	};
@@ -128,7 +128,7 @@ module.exports = (_ => {
 						return that.messageReceivedOrUpdated(dispatch);
 					}
 				});
-				this.selfID = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getUser")).getCurrentUser().id;
+				this.selfID = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getCurrentUser")).getCurrentUser().id;
 				this.currentChannel = BdApi.Webpack.getModule(BdApi.Webpack.Filters.byProps("getVoiceChannelId")).getChannelId;
 				this.checkSettings();
 				this.checkChangelog();
