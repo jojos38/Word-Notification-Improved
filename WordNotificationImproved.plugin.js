@@ -1,7 +1,7 @@
 /**
  * @name WordNotificationImproved
- * @author jojos38 (jojos38#1337) / Original idea by Qwerasd
- * @description Notifiy the user when a specific word is said in a server
+ * @author jojos38 / Original idea by Qwerasd
+ * @description Notify the user when a specific words are said in a server
  * @version 0.1.3
  * @invite DXpb9DN
  * @authorId 137239068567142400
